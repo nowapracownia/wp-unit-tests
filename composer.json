@@ -1,0 +1,28 @@
+{
+    "name": "tn/wp-unit-tests-scaffold",
+    "description": "Scaffold PHPUnit tests setup for WordPress themes and plugins.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tomasz Nowak",
+            "email": "tomasz.nowak@xfive.co"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "TN\\WPUnitScaffold\\": "src/"
+        }
+    },
+    "bin": [
+        "bin/scaffold"
+    ],
+    "scripts": {
+        "post-install-cmd": [
+            "@php -r \"echo '\\n✅ Package installed. Run: vendor/bin/scaffold to setup tests\\n';\""
+        ]
+    }
+}

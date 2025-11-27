@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+
+// Autoload
+foreach ([__DIR__ . '/../../../autoload.php', __DIR__ . '/../vendor/autoload.php'] as $file) {
+    if (file_exists($file)) {
+        require $file;
+        break;
+    }
+}
+
+use TN\WPUnitScaffold\ScaffoldCommand;
+
+$command = new ScaffoldCommand();
+$command->run();
