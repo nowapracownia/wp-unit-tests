@@ -1,5 +1,5 @@
 {
-    "name": "tn/wp-unit-tests-scaffold",
+    "name": "tn-xfive/wp-unit-tests-scaffold",
     "description": "Scaffold PHPUnit tests setup for WordPress themes and plugins.",
     "type": "library",
     "license": "MIT",
