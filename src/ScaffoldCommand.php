@@ -71,8 +71,8 @@ class ScaffoldCommand
 		echo "\nNext steps:\n";
 		echo "  1. Run: composer require --dev phpunit/phpunit (if not yet installed)\n";
 		echo "  2. Run: composer require --dev wp-phpunit/wp-phpunit (if not yet installed)\n";
-		echo "  3. Run: composer require --dev yoast/phpunit-polyfills:\"^2.0\" (if not yet installed)\n";
-		echo "  ➡️ 4. After completing the setup in phpunit.xml and wp-tests-config-sample.php run: vendor/bin/phpunit to check if testing works.\n\n";
+		echo "  3. Run: composer require --dev yoast/phpunit-polyfills:\"^2.0\" (if not yet installed)\n\n";
+		echo "  ➡️ 4. After completing the setup in phpunit.xml and wp-tests-config-sample.php run: vendor/bin/phpunit to check if testing works.\n";
 		echo "  ➡️ 5. Consider adding testing files and folders to .gitignore.\n\n";
 	}
 

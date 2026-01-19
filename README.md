@@ -2,9 +2,9 @@
 Tests setup and boilerplate for testing WordPress with PHPUnit.
 
 ## Usage in projects
-To start using PHPUnit for unit testing in WordPress first install PHPUnit in your project (prefereably with Composer: `composer require --dev phpunit/phpunit:^9.5`, see https://docs.phpunit.de/en/12.4/installation.html#composer). We need version 9.5 to be compatible with WordPress tests SDK.
+To start using PHPUnit for unit testing in WordPress first install PHPUnit in your project (prefereably with Composer: `composer require --dev phpunit/phpunit:"^9.5"`, see https://docs.phpunit.de/en/12.4/installation.html#composer). We need version 9.5 to be compatible with WordPress tests SDK.
 
-Then install WordPress tests SDK with `composer require --dev wp-phpunit/wp-phpunit` and `composer require --dev yoast/phpunit-polyfills:"^2.0"`.
+Then install WordPress tests SDK with `composer require --dev wp-phpunit/wp-phpunit:"^6.9"` and `composer require --dev yoast/phpunit-polyfills:"^2.0"`.
 
 Then navigate to your project root and run the following commands:
 1. `composer require --dev tn-xfive/wp-unit-tests-scaffold`
