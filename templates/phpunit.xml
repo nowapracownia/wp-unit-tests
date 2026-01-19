@@ -2,9 +2,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
-         cacheDirectory=".phpunit.cache"
          executionOrder="depends,defects"
-         requireCoverageMetadata="false"
          colors="true"
 	>
     <testsuites>
@@ -13,9 +11,12 @@
         </testsuite>
     </testsuites>
 
-    <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">
-        <include>
-            <directory>src</directory>
-        </include>
-    </source>
+    <php>
+		<env
+			name="WP_TESTS_DIR"
+			value="vendor/wp-phpunit/wp-phpunit"
+		/>
+		<env name="WP_CORE_DIR" value="[path_to_your_wordpress_project_root]"/>
+		<env name="WP_PHPUNIT__TESTS_CONFIG" value="tests/wp-tests-config.php"/>
+    </php>
 </phpunit>
