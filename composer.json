@@ -1,6 +1,7 @@
 {
     "name": "tn-xfive/wp-unit-tests-scaffold",
     "description": "Scaffold PHPUnit tests setup for WordPress themes and plugins.",
+	"keywords": ["wordpress", "phpunit", "testing", "scaffold", "wp-phpunit"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -22,7 +23,7 @@
     ],
     "scripts": {
         "post-install-cmd": [
-            "@php -r \"echo '\\n✅ Package installed. Run: vendor/bin/scaffold to setup tests\\n';\""
+            "@php -r \"echo '\\n✅ Package installed. Run: vendor/bin/scaffold to setup testing suite with WordPress tests.\\n';\""
         ]
     }
 }

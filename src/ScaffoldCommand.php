@@ -3,172 +3,141 @@ namespace TN\WPUnitScaffold;
 
 class ScaffoldCommand
 {
-    private $projectRoot;
-    private $templatesDir;
-    private $wpRoot;
-    private $levelsToWpRoot;
+	private $projectRoot;
+	private $templatesDir;
+	private $wpRoot;
 
-    public function __construct()
-    {
-        // Project root is where composer.json is (where vendor/ is installed)
-        $this->projectRoot  = dirname( __DIR__, 4 );
-        $this->templatesDir = dirname( __DIR__ ) . '/templates';
-        
-        // Find WordPress root
-        $this->wpRoot = $this->findWordPressRoot();
-        
-        if ( ! $this->wpRoot ) {
-            echo "❌ Error: WordPress installation not found.\n";
-            echo "   Could not locate wp-load.php in parent directories.\n";
-            echo "   Please run this command from within a WordPress installation.\n\n";
-            exit( 1 );
-        }
-        
-        // Calculate how many levels up from tests/ to WordPress root
-        $this->levelsToWpRoot = $this->calculateLevelsToWpRoot();
-    }
+	public function __construct()
+	{
+		// Project root is where composer.json is (where vendor/ is installed)
+		$this->projectRoot  = dirname( __DIR__, 4 );
+		$this->templatesDir = dirname( __DIR__ ) . '/templates';
+		
+		// Find WordPress root
+		$this->wpRoot = $this->findWordPressRoot();
+		
+		if ( ! $this->wpRoot ) {
+			echo "❌ Error: WordPress installation not found.\n";
+			echo "   Could not locate wp-load.php in parent directories.\n";
+			echo "   Please run this command from within a WordPress installation.\n\n";
+			exit( 1 );
+		}
+	}
 
-    public function run()
-    {
-        echo "🚀 TN WordPress Unit Tests Scaffold\n\n";
-        echo "📍 WordPress root detected: " . $this->wpRoot . "\n";
-        echo "📍 Project root: " . $this->projectRoot . "\n";
-        echo "📍 Levels to WP root from tests/: " . $this->levelsToWpRoot . "\n\n";
+	public function run()
+	{
+		echo "🚀 TN WordPress Unit Tests Scaffold\n\n";
+		echo "📍 WordPress root detected: " . $this->wpRoot . "\n";
+		echo "📍 Project root: " . $this->projectRoot . "\n";
 
-        if ( $this->filesExist() ) {
-            echo "⚠️  Files already exist. Overwrite? (y/n): ";
+		if ( $this->filesExist() ) {
+			echo "⚠️  Files already exist. Overwrite? (y/n): ";
 
-            $handle = fopen( "php://stdin", "r" );
-            $line   = fgets( $handle );
-            if ( trim( $line ) !== 'y' ) {
-                echo "❌ Aborted.\n";
-                return;
-            }
-        }
+			$handle = fopen( "php://stdin", "r" );
+			$line   = fgets( $handle );
+			if ( trim( $line ) !== 'y' ) {
+				echo "❌ Aborted.\n";
+				return;
+			}
+			fclose( $handle );
+		}
 
-        $this->createDirectory( $this->projectRoot . '/tests' );
+		if ( ! $this->createDirectory( $this->projectRoot . '/tests' ) ) {
+			echo "\n❌ Setup failed: Could not create tests directory.\n";
+			exit( 1 );
+		}
 
-        $files = array(
-            'WordPressTest.php' => '/tests/WordPressTest.php',
-            'phpunit.xml'       => '/phpunit.xml'
-        );
+		$files = array(
+			'bootstrap.php'              => '/tests/bootstrap.php',
+			'phpunit.xml'                => '/phpunit.xml',
+			'WordPressTest.php'          => '/tests/WordPressTest.php',
+			'wp-tests-config-sample.php' => '/tests/wp-tests-config-sample.php'
+		);
 
-        foreach ( $files as $template => $destination ) {
-            $this->copyFile( $template, $destination );
-        }
-        
-        // Create bootstrap.php with dynamic path
-        $this->createBootstrap();
+		$hasErrors = false;
+		foreach ( $files as $template => $destination ) {
+			if ( ! $this->copyFile( $template, $destination ) ) {
+				$hasErrors = true;
+			}
+		}
+		
+		if ( $hasErrors ) {
+			echo "\n⚠️ Setup completed with errors. Please check the messages above.\n";
+			exit( 1 );
+		} else {
+			echo "\n✅ Setup complete!\n";
+		}
+		
+		echo "\nNext steps:\n";
+		echo "  1. Run: composer require --dev phpunit/phpunit (if not yet installed)\n";
+		echo "  2. Run: composer require --dev wp-phpunit/wp-phpunit (if not yet installed)\n";
+		echo "  3. Run: composer require --dev yoast/phpunit-polyfills:\"^2.0\" (if not yet installed)\n";
+		echo "  ➡️ 4. After completing the setup in phpunit.xml and wp-tests-config-sample.php run: vendor/bin/phpunit to check if testing works.\n\n";
+		echo "  ➡️ 5. Consider adding testing files and folders to .gitignore.\n\n";
+	}
 
-        echo "\n✅ Setup complete!\n";
-        echo "\nNext steps:\n";
-        echo "  1. Run: composer require --dev phpunit/phpunit (if not installed)\n";
-        echo "  2. Run: vendor/bin/phpunit\n\n";
-    }
+	/**
+	 * Find WordPress root by looking for wp-load.php
+	 */
+	private function findWordPressRoot()
+	{
+		$currentDir = $this->projectRoot;
+		$maxLevels  = 10; // Safety limit
+		
+		for ( $i = 0; $i < $maxLevels; $i++ ) {
+			if ( file_exists( $currentDir . '/wp-load.php' ) ) {
+				return realpath( $currentDir );
+			}
+			
+			$parentDir = dirname( $currentDir );
+			
+			// Reached filesystem root
+			if ( $parentDir === $currentDir ) {
+				break;
+			}
+			
+			$currentDir = $parentDir;
+		}
+		
+		return false;
+	}
 
-    /**
-     * Find WordPress root by looking for wp-load.php
-     */
-    private function findWordPressRoot()
-    {
-        $currentDir = $this->projectRoot;
-        $maxLevels  = 10; // Safety limit
-        
-        for ( $i = 0; $i < $maxLevels; $i++ ) {
-            if ( file_exists( $currentDir . '/wp-load.php' ) ) {
-                return realpath( $currentDir );
-            }
-            
-            $parentDir = dirname( $currentDir );
-            
-            // Reached filesystem root
-            if ( $parentDir === $currentDir ) {
-                break;
-            }
-            
-            $currentDir = $parentDir;
-        }
-        
-        return false;
-    }
+	private function filesExist()
+	{
+		return 	file_exists( $this->projectRoot . '/tests/wp-tests-config-sample.php' ) ||
+				file_exists( $this->projectRoot . '/tests/bootstrap.php' ) ||
+				file_exists( $this->projectRoot . '/tests/WordPressTest.php' ) ||
+				file_exists( $this->projectRoot . '/phpunit.xml' );
+	}
 
-    /**
-     * Calculate how many dirname() levels needed from tests/ to WordPress root
-     */
-    private function calculateLevelsToWpRoot()
-    {
-        $testsDir = $this->projectRoot . '/tests';
-        $wpRoot   = $this->wpRoot;
-        
-        // Normalize paths
-        $testsDir = str_replace( '\\', '/', realpath( $testsDir ) ?: $testsDir );
-        $wpRoot   = str_replace( '\\', '/', $wpRoot );
-        
-        // Count directory levels between tests/ and WP root
-        $testsParts = explode( '/', $testsDir );
-        $wpParts    = explode( '/', $wpRoot );
-        
-        // Find common base
-        $commonLength = 0;
-        $minLength    = min( count( $testsParts ), count( $wpParts ) );
-        
-        for ( $i = 0; $i < $minLength; $i++ ) {
-            if ( $testsParts[ $i ] === $wpParts[ $i ] ) {
-                $commonLength++;
-            } else {
-                break;
-            }
-        }
-        
-        // Levels up from tests/ to common base, then to WP root
-        $levelsUp = count( $testsParts ) - $commonLength;
-        
-        // We need to go up one more level because we're inside tests/ directory
-        // and dirname(__DIR__) goes to project root first
-        return $levelsUp;
-    }
+	private function createDirectory( $path )
+	{
+		if ( ! is_dir( $path ) ) {
+			if ( ! mkdir( $path, 0755, true ) ) {
+				echo "❌ Failed to create directory: " . basename( $path ) . "/\n";
+				return false;
+			}
+			echo "📁 Created: " . basename( $path ) . "/\n";
+		}
+		return true;
+	}
 
-    /**
-     * Create bootstrap.php with correct path to wp-load.php
-     */
-    private function createBootstrap()
-    {
-        $destination = $this->projectRoot . '/tests/bootstrap.php';
-        
-        $content = "<?php\n\n";
-        $content .= "require_once dirname(__DIR__, {$this->levelsToWpRoot}) . '/wp-load.php';\n";
-        
-        if ( file_put_contents( $destination, $content ) ) {
-            echo "✅ Created: /tests/bootstrap.php (with {$this->levelsToWpRoot} levels to WP root)\n";
-        } else {
-            echo "❌ Failed: /tests/bootstrap.php\n";
-        }
-    }
+	private function copyFile( $template, $destination )
+	{
+		$source = $this->templatesDir . '/' . $template;
+		$dest   = $this->projectRoot . $destination;
 
-    private function filesExist()
-    {
-        return file_exists( $this->projectRoot . '/tests/bootstrap.php' ) ||
-               file_exists( $this->projectRoot . '/tests/WordPressTest.php' ) ||
-               file_exists( $this->projectRoot . '/phpunit.xml' );
-    }
+		if ( ! file_exists( $source ) ) {
+			echo "❌ Template not found: " . $template . "\n";
+			return false;
+		}
 
-    private function createDirectory( $path )
-    {
-        if ( ! is_dir( $path ) ) {
-            mkdir( $path, 0755, true );
-            echo "📁 Created: " . basename( $path ) . "/\n";
-        }
-    }
-
-    private function copyFile( $template, $destination )
-    {
-        $source = $this->templatesDir . '/' . $template;
-        $dest   = $this->projectRoot . $destination;
-
-        if ( copy( $source, $dest ) ) {
-            echo "✅ Created: " . $destination . "\n";
-        } else {
-            echo "❌ Failed: " . $destination . "\n";
-        }
-    }
+		if ( copy( $source, $dest ) ) {
+			echo "✅ Created: " . $destination . "\n";
+			return true;
+		} else {
+			echo "❌ Failed to copy: " . $destination . "\n";
+			return false;
+		}
+	}
 }
